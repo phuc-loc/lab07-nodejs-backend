@@ -8,7 +8,7 @@ const Product = require('../models/product')
 exports.postAddProduct = (req, res, next) => {
     console.log('postAddProduct',req.body);
     const title = req.body.title;
-    const imageurl = req.body.imageurl;
+    const imageurl = req.body.imageurl; 
     const price = req.body.price;
     const description = req.body.description;
     const product = new Product(null, title, imageurl, description, price);
@@ -17,9 +17,14 @@ exports.postAddProduct = (req, res, next) => {
 }
 
 exports.getAddProduct = (req, res, next) => {
-    Product.fetchAll(products => {
-        return res.json(products);
-    });
+    // Product.fetchAll( products => {
+    //     return res.json(products);
+    // });
+    Product.fetchAll()
+    .then(( [rows, fielData] ) => {
+        return res.json(rows)
+    })
+    .catch(err => console.log(err))
 }
 
 

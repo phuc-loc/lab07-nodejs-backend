@@ -4,7 +4,7 @@ const adminController = require('../controllers/admin')
 
 router.post('/add-product', adminController.postAddProduct );
 
-router.get('/add-product', adminController.getAddProduct);
+router.get('/add-product', adminController.getAddProduct); 
 
 router.post('/edit-product', adminController.postEditProduct);
 

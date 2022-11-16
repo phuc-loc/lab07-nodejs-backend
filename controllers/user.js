@@ -1,13 +1,11 @@
 const Product = require('../models/product');
 const Cart = require('../models/cart');
 
-//xem thử trong file json có DL chưa ???
+// //xem thử trong file json có DL chưa ???
 exports.getCart = (req, res, next) => {
     Cart.getCart(cart => {
       Product.fetchAll( products => {
-
         const cartProducts = [];
-
         for (product of products) { 
 
           const cartProductData = cart.products.find(
@@ -25,7 +23,7 @@ exports.getCart = (req, res, next) => {
   }; 
   
 
-  //ghi vào file json 
+//   //ghi vào file json 
   exports.postCart = (req, res, next) => {
     const prodId = req.body.id;
     console.log(prodId);

@@ -1,19 +1,37 @@
 const Product = require('../models/product');
 
 exports.postAddProduct = (req, res, next) => {
-    console.log('postAddProduct',req.body);
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl; 
+    const imageUrl = req.body.imageUrl;  
     const price = req.body.price;
     const description = req.body.description;
-    Product.create({
-        title: title,
-        price: price,
-        imageUrl: imageUrl,
-        description: description
+
+    // Product.create({
+    //     title: title,
+    //     price: price,
+    //     imageUrl: imageUrl,
+    //     description: description,
+    //     userId: req.user.id
+    // })
+    // .then(result => console.log('Created Product!!!'))
+    // .catch(err => console.log(err))
+
+    req.user
+    .createProduct({
+      title: title,
+      price: price,
+      imageUrl: imageUrl,
+      description: description
     })
-    .then(result => console.log('Created Product!!!'))
-    .catch(err => console.log(err))
+    .then(result => {
+      // console.log(result);
+      console.log('Created Product');
+      res.redirect('/admin/products');
+    })
+    .catch(err => {
+      console.log(err);
+    });
+
 }
 
 exports.getAddProduct = (req, res, next) => {
@@ -46,12 +64,12 @@ exports.postEditProduct = (req, res, next) => {
     .then(result => {
       console.log('Updated Product!!!');
     })
-    .catch(err => console.log('Edit error:', err));
+    .catch(err => console.log('Edit error:', err)); 
 
 }
 
 exports.postDeleteProduct = (req, res, next) => {   
-    const prodId = req.body.productId;
+    const prodId = req.body.productId; 
     // Product.deleteById(prodId); 
     Product.findByPk(prodId)
     .then(product => {

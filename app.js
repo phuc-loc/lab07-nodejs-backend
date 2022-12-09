@@ -8,15 +8,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const adminRouter = require('./routes/admin');
 const userRouter = require('./routes/user');
+const errorController = require('./controllers/error')
 
-const mongoConnect = require('./util/database').mongoConnect;
-const User = require('./models/user')
+const mongoose = require('mongoose');
+const User = require('./models/user');
+
 
 app.use((req, res, next) => { 
-  console.log('hello')
-    User.findById('638da528760d3570ef58bc70')
+  // console.log('hello')
+    User.findById('6392e3ebad0fa8875aaba813')
         .then(user => {
-            req.user = new User(user.name, user.email, user.cart, user._id);
+            req.user = user;
             next();
         })
         .catch(err => console.log(err));
@@ -24,8 +26,30 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRouter);
 app.use('/user', userRouter);
+app.use(errorController.get404)
 
-
-mongoConnect(() => {
-  app.listen(5001);
-})
+// mongoConnect(() => {
+//   app.listen(5001);
+// })
+mongoose
+  .connect('mongodb+srv://Loc_nguyen:mDEMfSQT_Dr5est@cluster0.xrlivxz.mongodb.net/exercise?retryWrites=true&w=majority')
+  .then(result => {
+    User 
+    .findOne()
+    .then (user => {
+      if(!user){
+        const user = new User ({
+          name: "ABC",
+          email: "ABC@mail.com",
+          cart: {
+            items: []
+          }
+        })
+        user.save()
+      }
+    })
+    app.listen(5001)
+  })
+  .catch(err => {
+    console.log(err)
+  })

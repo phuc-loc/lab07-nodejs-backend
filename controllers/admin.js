@@ -10,13 +10,17 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  const product = new Product(title, price, description, imageUrl, null, req.user._id)
+  const product = new Product({
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl
+  })
   console.log('//product in controller', product)
   product.save()
     .then(result => {
       // console.log(result);
       console.log('Created Product');
-      res.redirect('/admin/products');
     })
     .catch(err => {
       console.log(err); 
@@ -24,8 +28,8 @@ exports.postAddProduct = (req, res, next) => {
 
 }
 
-exports.getAddProduct = (req, res, next) => {
-  Product.fetchAll()
+exports.getAddProduct = (req, res, next) => { 
+  Product.find()
     .then(products => {
       // console.log(products)
       return res.json(products);
@@ -51,11 +55,17 @@ exports.postEditProduct = (req, res, next) => {
   //   console.log('product', product); 
   //   return product.save();
   // })
-  const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, new ObjectId(prodId));
-  console.log('//product', product)
-  product.save()
+  Product
+  .findById(prodId)
+  .then(product => {
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.imageUrl = updatedImageUrl;
+    product.description = updatedDesc;
+    return product.save();
+  })
     .then(result => {
-      console.log('//result', result)
+      // console.log('//result', result)
       console.log('Updated Product!!!');
     })
     .catch(err => console.log('Edit error:', err));
@@ -64,9 +74,9 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  console.log(req.body)
-  // Product.deleteById(prodId); 
-  Product.deleteById(prodId)
+  // console.log(req.body)
+  Product
+  .findByIdAndRemove(prodId)
     .then(() => {
       console.log('Deleted from controller!')
     })

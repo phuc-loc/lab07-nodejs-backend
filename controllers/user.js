@@ -1,98 +1,94 @@
 const Product = require('../models/product');
-// const User = require('../models/user');
+const Order = require('../models/order')
 
-
-//tra ve React khi fetch
+//CART
+//1. tra ve React khi fetch
 exports.getCart = (req, res, next) => {
   req.user
-    .getCart()
-    // .then(cart => {
-    //   return cart.getProducts()
-        .then(products => {
-          // console.log('//products', products)
-          return res.json(products)
-        })
-        .catch(err => console.log(err));
-  
-};
-
-//nhan tu React khi post
-exports.postCart = (req, res, next) => {
-  // const prodId = req.body.id;
-  // req.user
   //   .getCart()
-  //   .then(cart => {
-  //     fetchedCart = cart;
-  //     return cart.getProducts({ where: { id: prodId } });
-  //   })
   //   .then(products => {
-  //     let product;
-  //     if (products.length > 0) {
-  //       product = products[0];
-  //     }
-  //     if (product) {
-  //       const oldQuantity = product.cartItem.quantity;
-  //       newQuantity = oldQuantity + 1;
-  //       return product;
-  //     }
-  //     return Product.findByPk(prodId);
+  //     return res.json(products)
   //   })
-  //   .then(product => {
-  //     return fetchedCart.addProduct(product, {
-  //       through: { quantity: newQuantity }
-  //     });
-  //   })
-  //   .catch(err => console.log(err)); 
-  const prodId = req.body.id;
-
-  Product.findById(prodId).then(product => {
-    return req.user.addToCart(product)
+  //   .catch(err => console.log(err));
+  .populate('cart.items.productId')
+  .then(user => {
+    // console.log('//user', test)
+    const products = user.cart.items;
+    return res.json(products)
   })
-  .then(result => {
-    console.log(result);
+  .catch(err => {
+    console.log(err);
   })
 };
 
-// xoa cart
-exports.postDeleteCartItem = (req, res, next) => {
-  // console.log("req.body")
+//2. nhan tu React khi post
+exports.postCart = (req, res, next) => {
   const prodId = req.body.id;
-  req.user 
-  // .then(cart => { 
-  //   return cart.getProducts({ where: { id: prodId } });
-  // })
-  // .then(products => {
-  //   const product = products[0];
-  //   return product.cartItem.destroy();
-  // })
-  .deleteItemFromCart(prodId)
-  .then(() => {
-    console.log('Deleted!!')
-  })
-  .catch(err => console.log(err));
+  Product
+    .findById(prodId)
+    .then(product => {
+      return req.user
+        .addToCart(product)
+    })
+    .then(result => {
+      console.log(result);
+    })
+};
+
+//3. xoa cart
+exports.postDeleteCartItem = (req, res, next) => {
+  console.log("req.body", req.body)
+  const prodId = req.body.id;
+  req.user
+    .deleteItemFromCart(prodId)
+    .then((result) => {
+      console.log('Deleted!!')
+    })
+    .catch(err => console.log(err));
 }
 
 //ORDER
-
-//post order
+//1. 
 exports.postOrder = (req, res, next) => {
   req.user
-    .addOrder()
+    // .addOrder()
+    .populate('cart.items.productId')
+    .then(user => {
+
+      const products = user.cart.items.map(i => {
+        return {
+          quantity: i.quantity,
+          product: {...i.productId._doc} //chu y: nếu để trong map phải thêm _doc
+        }
+      })//
+
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          userId: req.user
+        },
+        products: products
+      })//
+
+      return order.save() //??
+    })
     .then((result) => {
-      console.log('1 order added!!')
+      // console.log('1 order added!!')
+      req.user.clearCart();
     })
     .catch(err => console.log(err));
 };
 
 
-//get order
+//2. get order
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+  // req.user
+  //   .getOrders()
+  Order 
+  .find()
+  // .find({'user.userId': req.user._id})
     .then(orders => {
-
       return res.json(orders)
-    
     })
     .catch(err => console.log(err));
 };
